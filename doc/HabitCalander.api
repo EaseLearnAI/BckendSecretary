@@ -1,0 +1,436 @@
+ 1.@CalendarView.vue ,仔细分析这个页面它所需要的API接口，我希望实现通过一个get接口能够实现当输入带有时间参数时候，能够返回对应的时间底下的所有任务
+第二个功能点实现对应习惯的@HabitsView.vue ，增删改查获取的接口创建，注意一定要模块化的进行拆分，我希望要注意习惯这里有一个特殊它会有标签，完成的次数，还有今天是否完成，习惯的名字，图标地址，
+
+第三，我希望用户在AI秘书里面的用户输入所有内容，可以保存到一个专有的集合，用ID来进行区分，不同用户@AIAssistantView.vue 
+
+基于我上面的需求，请你给我一份api需求文档，使得后端能够通过这份API文档创建对应的api接口和数据库还有集合
+
+
+# API 需求文档
+
+## 1. 日历功能 API
+
+### 1.1 获取日期任务
+```
+GET /api/calendar/tasks
+```
+
+**功能**: 根据时间参数返回对应时间下的所有任务
+
+**请求参数**:
+- `date`: ISO日期字符串 (可选，默认为当天)
+- `startDate`: ISO日期字符串 (可选，用于范围查询)
+- `endDate`: ISO日期字符串 (可选，用于范围查询)
+- `userId`: 用户ID
+
+**响应**:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "string",
+      "name": "string",
+      "date": "ISO日期字符串",
+      "timeRange": "string",
+      "icon": "string",
+      "color": "string",
+      "completed": boolean
+    }
+  ]
+}
+```
+
+## 2. 习惯功能 API
+
+### 2.1 获取习惯列表
+```
+GET /api/habits
+```
+
+**请求参数**:
+- `userId`: 用户ID
+- `tag`: 标签名 (可选，用于标签筛选)
+
+**响应**:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "string",
+      "name": "string",
+      "icon": "string",
+      "tags": ["string"],
+      "completionCount": number,
+      "completedToday": boolean,
+      "streak": number,
+      "color": "string",
+      "createdAt": "ISO日期字符串"
+    }
+  ]
+}
+```
+
+### 2.2 创建习惯
+```
+POST /api/habits
+```
+
+**请求体**:
+```json
+{
+  "name": "string",
+  "icon": "string",
+  "tags": ["string"],
+  "color": "string",
+  "userId": "string"
+}
+```
+
+**响应**:
+```json
+{
+  "success": true,
+  "data": {
+    "id": "string",
+    "name": "string",
+    "icon": "string",
+    "tags": ["string"],
+    "completionCount": 0,
+    "completedToday": false,
+    "streak": 0,
+    "color": "string",
+    "createdAt": "ISO日期字符串"
+  }
+}
+```
+
+### 2.3 更新习惯
+```
+PUT /api/habits/:id
+```
+
+**请求参数**:
+- `id`: 习惯ID
+
+**请求体**:
+```json
+{
+  "name": "string",
+  "icon": "string",
+  "tags": ["string"],
+  "color": "string"
+}
+```
+
+**响应**:
+```json
+{
+  "success": true,
+  "data": {
+    "id": "string",
+    "name": "string",
+    "icon": "string",
+    "tags": ["string"],
+    "completionCount": number,
+    "completedToday": boolean,
+    "streak": number,
+    "color": "string",
+    "updatedAt": "ISO日期字符串"
+  }
+}
+```
+
+### 2.4 删除习惯
+```
+DELETE /api/habits/:id
+```
+
+**请求参数**:
+- `id`: 习惯ID
+
+**响应**:
+```json
+{
+  "success": true,
+  "message": "习惯已删除"
+}
+```
+
+### 2.5 完成习惯
+```
+POST /api/habits/:id/complete
+```
+
+**请求参数**:
+- `id`: 习惯ID
+
+**请求体**:
+```json
+{
+  "date": "ISO日期字符串" // 可选，默认当天
+}
+```
+
+**响应**:
+```json
+{
+  "success": true,
+  "data": {
+    "completionCount": number,
+    "completedToday": true,
+    "streak": number
+  }
+}
+```
+
+### 2.6 取消完成习惯
+```
+POST /api/habits/:id/uncomplete
+```
+
+**请求参数**:
+- `id`: 习惯ID
+
+**请求体**:
+```json
+{
+  "date": "ISO日期字符串" // 可选，默认当天
+}
+```
+
+**响应**:
+```json
+{
+  "success": true,
+  "data": {
+    "completionCount": number,
+    "completedToday": false,
+    "streak": number
+  }
+}
+```
+
+### 2.7 获取习惯标签列表
+```
+GET /api/habits/tags
+```
+
+**请求参数**:
+- `userId`: 用户ID
+
+**响应**:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "name": "string",
+      "count": number
+    }
+  ]
+}
+```
+
+## 3. AI秘书对话 API
+
+### 3.1 保存用户对话
+```
+POST /api/assistant/conversations
+```
+
+**请求体**:
+```json
+{
+  "userId": "string",
+  "message": "string",
+  "timestamp": "ISO日期字符串"
+}
+```
+
+**响应**:
+```json
+{
+  "success": true,
+  "data": {
+    "id": "string",
+    "userId": "string",
+    "message": "string",
+    "timestamp": "ISO日期字符串"
+  }
+}
+```
+
+### 3.2 获取用户对话历史
+```
+GET /api/assistant/conversations
+```
+
+**请求参数**:
+- `userId`: 用户ID
+- `limit`: 返回记录数量 (可选，默认20)
+- `before`: 时间戳 (可选，用于分页)
+
+**响应**:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "string",
+      "userId": "string",
+      "message": "string",
+      "timestamp": "ISO日期字符串",
+      "cards": {
+        "events": [],
+        "tasks": [],
+        "habits": []
+      }
+    }
+  ]
+}
+```
+
+### 3.3 分析用户输入
+```
+POST /api/assistant/analyze
+```
+
+**请求体**:
+```json
+{
+  "userId": "string",
+  "input": "string"
+}
+```
+
+**响应**:
+```json
+{
+  "success": true,
+  "data": {
+    "events": [
+      {
+        "id": "string",
+        "title": "string",
+        "startTime": "ISO日期字符串",
+        "endTime": "ISO日期字符串",
+        "location": "string",
+        "priority": "string",
+        "description": "string"
+      }
+    ],
+    "tasks": [
+      {
+        "id": "string",
+        "title": "string",
+        "dueDate": "ISO日期字符串",
+        "priority": "string",
+        "description": "string"
+      }
+    ],
+    "habits": [
+      {
+        "id": "string",
+        "title": "string",
+        "tags": ["string"],
+        "icon": "string"
+      }
+    ]
+  }
+}
+```
+
+## 4. 数据库设计
+
+### 4.1 集合: users
+```json
+{
+  "_id": "ObjectId",
+  "username": "string",
+  "email": "string",
+  "password": "string (hashed)",
+  "createdAt": "Date",
+  "updatedAt": "Date"
+}
+```
+
+### 4.2 集合: calendar_tasks
+```json
+{
+  "_id": "ObjectId",
+  "userId": "ObjectId (ref: users)",
+  "name": "string",
+  "date": "Date",
+  "timeRange": "string",
+  "icon": "string",
+  "color": "string",
+  "completed": "boolean",
+  "createdAt": "Date",
+  "updatedAt": "Date"
+}
+```
+
+### 4.3 集合: habits
+```json
+{
+  "_id": "ObjectId",
+  "userId": "ObjectId (ref: users)",
+  "name": "string",
+  "icon": "string",
+  "tags": ["string"],
+  "completionCount": "number",
+  "streak": "number",
+  "color": "string",
+  "createdAt": "Date",
+  "updatedAt": "Date"
+}
+```
+
+### 4.4 集合: habit_completions
+```json
+{
+  "_id": "ObjectId",
+  "habitId": "ObjectId (ref: habits)",
+  "userId": "ObjectId (ref: users)",
+  "date": "Date",
+  "createdAt": "Date"
+}
+```
+
+### 4.5 集合: assistant_conversations
+```json
+{
+  "_id": "ObjectId",
+  "userId": "ObjectId (ref: users)",
+  "message": "string",
+  "type": "string (user/ai)",
+  "cards": {
+    "events": [],
+    "tasks": [],
+    "habits": []
+  },
+  "timestamp": "Date",
+  "createdAt": "Date"
+}
+```
+
+## 5. 索引设计
+
+1. `calendar_tasks`: 
+   - `{ userId: 1, date: 1 }`
+   - `{ date: 1 }`
+
+2. `habits`:
+   - `{ userId: 1 }`
+   - `{ userId: 1, tags: 1 }`
+
+3. `habit_completions`:
+   - `{ habitId: 1, date: 1 }`
+   - `{ userId: 1, date: 1 }`
+
+4. `assistant_conversations`:
+   - `{ userId: 1, timestamp: -1 }`
+
+此API文档提供了实现需求的基本框架，后端开发人员可以根据此文档设计和实现相应的接口和数据库集合。

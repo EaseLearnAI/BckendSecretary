@@ -1,0 +1,710 @@
+I'll create a documentation for the RESTful API interface that would support the frontend task management application you're building. Based on the components and store you've provided, here's the API documentation:
+
+# Task Management RESTful API Documentation
+
+## Base URL
+```
+/api/v1
+```
+
+## Authentication
+All endpoints require authentication via JWT token in the Authorization header:
+```
+Authorization: Bearer <token>
+```
+
+## Task Groups Endpoints
+
+### Get All Task Groups
+```
+GET /task-groups
+```
+Returns all task groups with their tasks.
+
+**Response (200 OK)**
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "工作项目",
+      "tasks": [
+        {
+          "id": 1,
+          "name": "完成设计原型",
+          "completed": false,
+          "priority": "high",
+          "dueDate": "2023-06-10T14:00:00Z"
+        },
+        // More tasks...
+      ]
+    },
+    // More groups...
+  ]
+}
+```
+
+### Create Task Group
+```
+POST /task-groups
+```
+
+**Request Body**
+```json
+{
+  "name": "新任务集"
+}
+```
+
+**Response (201 Created)**
+```json
+{
+  "data": {
+    "id": 4,
+    "name": "新任务集",
+    "tasks": []
+  }
+}
+```
+
+### Update Task Group
+```
+PUT /task-groups/{groupId}
+```
+
+**Request Body**
+```json
+{
+  "name": "更新的任务集名称"
+}
+```
+
+**Response (200 OK)**
+```json
+{
+  "data": {
+    "id": 1,
+    "name": "更新的任务集名称"
+  }
+}
+```
+
+### Delete Task Group
+```
+DELETE /task-groups/{groupId}
+```
+
+**Response (204 No Content)**
+
+## Tasks Endpoints
+
+### Get All Tasks (Flat List)
+```
+GET /tasks
+```
+Returns all tasks across all groups.
+
+**Response (200 OK)**
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "完成设计原型",
+      "completed": false,
+      "priority": "high",
+      "dueDate": "2023-06-10T14:00:00Z",
+      "groupId": 1,
+      "groupName": "工作项目"
+    },
+    // More tasks...
+  ]
+}
+```
+
+### Create Task
+```
+POST /tasks
+```
+
+**Request Body**
+```json
+{
+  "name": "新任务",
+  "groupId": 1,
+  "priority": "medium",
+  "dueDate": "2023-06-25T18:00:00Z"
+}
+```
+
+**Response (201 Created)**
+```json
+{
+  "data": {
+    "id": 8,
+    "name": "新任务",
+    "completed": false,
+    "priority": "medium",
+    "dueDate": "2023-06-25T18:00:00Z",
+    "groupId": 1,
+    "groupName": "工作项目"
+  }
+}
+```
+
+### Get Task
+```
+GET /tasks/{taskId}
+```
+
+**Response (200 OK)**
+```json
+{
+  "data": {
+    "id": 1,
+    "name": "完成设计原型",
+    "completed": false,
+    "priority": "high",
+    "dueDate": "2023-06-10T14:00:00Z",
+    "groupId": 1,
+    "groupName": "工作项目"
+  }
+}
+```
+
+### Update Task
+```
+PUT /tasks/{taskId}
+```
+
+**Request Body**
+```json
+{
+  "name": "更新的任务名称",
+  "completed": true,
+  "priority": "high",
+  "dueDate": "2023-06-15T14:00:00Z"
+}
+```
+
+**Response (200 OK)**
+```json
+{
+  "data": {
+    "id": 1,
+    "name": "更新的任务名称",
+    "completed": true,
+    "priority": "high",
+    "dueDate": "2023-06-15T14:00:00Z",
+    "groupId": 1,
+    "groupName": "工作项目"
+  }
+}
+```
+
+### Update Task Status
+```
+PATCH /tasks/{taskId}/status
+```
+
+**Request Body**
+```json
+{
+  "completed": true
+}
+```
+
+**Response (200 OK)**
+```json
+{
+  "data": {
+    "id": 1,
+    "completed": true
+  }
+}
+```
+
+### Delete Task
+```
+DELETE /tasks/{taskId}
+```
+
+**Response (204 No Content)**
+
+## Task Quadrant Endpoints
+
+### Get Tasks by Quadrant
+```
+GET /tasks/quadrants
+```
+Returns tasks organized by quadrant based on importance and urgency.
+
+**Response (200 OK)**
+```json
+{
+  "data": {
+    "q1": [
+      // Important & Urgent tasks
+    ],
+    "q2": [
+      // Important & Not Urgent tasks
+    ],
+    "q3": [
+      // Not Important & Urgent tasks
+    ],
+    "q4": [
+      // Not Important & Not Urgent tasks
+    ]
+  }
+}
+```
+
+## Pomodoro Related Endpoints
+
+### Log Pomodoro Session
+```
+POST /tasks/{taskId}/pomodoro
+```
+
+**Request Body**
+```json
+{
+  "duration": 1500,
+  "startTime": "2023-06-05T10:30:00Z",
+  "endTime": "2023-06-05T10:55:00Z"
+}
+```
+
+**Response (201 Created)**
+```json
+{
+  "data": {
+    "id": 1,
+    "taskId": 1,
+    "duration": 1500,
+    "startTime": "2023-06-05T10:30:00Z",
+    "endTime": "2023-06-05T10:55:00Z"
+  }
+}
+```
+
+### Get Task Pomodoro Sessions
+```
+GET /tasks/{taskId}/pomodoro
+```
+
+**Response (200 OK)**
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "taskId": 1,
+      "duration": 1500,
+      "startTime": "2023-06-05T10:30:00Z",
+      "endTime": "2023-06-05T10:55:00Z"
+    },
+    // More pomodoro sessions...
+  ]
+}
+```
+
+## Error Responses
+
+### 400 Bad Request
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Validation failed",
+    "details": {
+      "name": "任务名称不能为空"
+    }
+  }
+}
+```
+
+### 401 Unauthorized
+```json
+{
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "Authentication required"
+  }
+}
+```
+
+### 404 Not Found
+```json
+{
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "Task with ID 999 not found"
+  }
+}
+```
+
+### 500 Internal Server Error
+```json
+{
+  "error": {
+    "code": "SERVER_ERROR",
+    "message": "An unexpected error occurred"
+  }
+}
+```
+I'll create a documentation for the RESTful API interface that would support the frontend task management application you're building. Based on the components and store you've provided, here's the API documentation:
+
+# Task Management RESTful API Documentation
+
+## Base URL
+```
+/api/v1
+```
+
+## Authentication
+All endpoints require authentication via JWT token in the Authorization header:
+```
+Authorization: Bearer <token>
+```
+
+## Task Groups Endpoints
+
+### Get All Task Groups
+```
+GET /task-groups
+```
+Returns all task groups with their tasks.
+
+**Response (200 OK)**
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "工作项目",
+      "tasks": [
+        {
+          "id": 1,
+          "name": "完成设计原型",
+          "completed": false,
+          "priority": "high",
+          "dueDate": "2023-06-10T14:00:00Z"
+        },
+        // More tasks...
+      ]
+    },
+    // More groups...
+  ]
+}
+```
+
+### Create Task Group
+```
+POST /task-groups
+```
+
+**Request Body**
+```json
+{
+  "name": "新任务集"
+}
+```
+
+**Response (201 Created)**
+```json
+{
+  "data": {
+    "id": 4,
+    "name": "新任务集",
+    "tasks": []
+  }
+}
+```
+
+### Update Task Group
+```
+PUT /task-groups/{groupId}
+```
+
+**Request Body**
+```json
+{
+  "name": "更新的任务集名称"
+}
+```
+
+**Response (200 OK)**
+```json
+{
+  "data": {
+    "id": 1,
+    "name": "更新的任务集名称"
+  }
+}
+```
+
+### Delete Task Group
+```
+DELETE /task-groups/{groupId}
+```
+
+**Response (204 No Content)**
+
+## Tasks Endpoints
+
+### Get All Tasks (Flat List)
+```
+GET /tasks
+```
+Returns all tasks across all groups.
+
+**Response (200 OK)**
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "完成设计原型",
+      "completed": false,
+      "priority": "high",
+      "dueDate": "2023-06-10T14:00:00Z",
+      "groupId": 1,
+      "groupName": "工作项目"
+    },
+    // More tasks...
+  ]
+}
+```
+
+### Create Task
+```
+POST /tasks
+```
+
+**Request Body**
+```json
+{
+  "name": "新任务",
+  "groupId": 1,
+  "priority": "medium",
+  "dueDate": "2023-06-25T18:00:00Z"
+}
+```
+
+**Response (201 Created)**
+```json
+{
+  "data": {
+    "id": 8,
+    "name": "新任务",
+    "completed": false,
+    "priority": "medium",
+    "dueDate": "2023-06-25T18:00:00Z",
+    "groupId": 1,
+    "groupName": "工作项目"
+  }
+}
+```
+
+### Get Task
+```
+GET /tasks/{taskId}
+```
+
+**Response (200 OK)**
+```json
+{
+  "data": {
+    "id": 1,
+    "name": "完成设计原型",
+    "completed": false,
+    "priority": "high",
+    "dueDate": "2023-06-10T14:00:00Z",
+    "groupId": 1,
+    "groupName": "工作项目"
+  }
+}
+```
+
+### Update Task
+```
+PUT /tasks/{taskId}
+```
+
+**Request Body**
+```json
+{
+  "name": "更新的任务名称",
+  "completed": true,
+  "priority": "high",
+  "dueDate": "2023-06-15T14:00:00Z"
+}
+```
+
+**Response (200 OK)**
+```json
+{
+  "data": {
+    "id": 1,
+    "name": "更新的任务名称",
+    "completed": true,
+    "priority": "high",
+    "dueDate": "2023-06-15T14:00:00Z",
+    "groupId": 1,
+    "groupName": "工作项目"
+  }
+}
+```
+
+### Update Task Status
+```
+PATCH /tasks/{taskId}/status
+```
+
+**Request Body**
+```json
+{
+  "completed": true
+}
+```
+
+**Response (200 OK)**
+```json
+{
+  "data": {
+    "id": 1,
+    "completed": true
+  }
+}
+```
+
+### Delete Task
+```
+DELETE /tasks/{taskId}
+```
+
+**Response (204 No Content)**
+
+## Task Quadrant Endpoints
+
+### Get Tasks by Quadrant
+```
+GET /tasks/quadrants
+```
+Returns tasks organized by quadrant based on importance and urgency.
+
+**Response (200 OK)**
+```json
+{
+  "data": {
+    "q1": [
+      // Important & Urgent tasks
+    ],
+    "q2": [
+      // Important & Not Urgent tasks
+    ],
+    "q3": [
+      // Not Important & Urgent tasks
+    ],
+    "q4": [
+      // Not Important & Not Urgent tasks
+    ]
+  }
+}
+```
+
+## Pomodoro Related Endpoints
+
+### Log Pomodoro Session
+```
+POST /tasks/{taskId}/pomodoro
+```
+
+**Request Body**
+```json
+{
+  "duration": 1500,
+  "startTime": "2023-06-05T10:30:00Z",
+  "endTime": "2023-06-05T10:55:00Z"
+}
+```
+
+**Response (201 Created)**
+```json
+{
+  "data": {
+    "id": 1,
+    "taskId": 1,
+    "duration": 1500,
+    "startTime": "2023-06-05T10:30:00Z",
+    "endTime": "2023-06-05T10:55:00Z"
+  }
+}
+```
+
+### Get Task Pomodoro Sessions
+```
+GET /tasks/{taskId}/pomodoro
+```
+
+**Response (200 OK)**
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "taskId": 1,
+      "duration": 1500,
+      "startTime": "2023-06-05T10:30:00Z",
+      "endTime": "2023-06-05T10:55:00Z"
+    },
+    // More pomodoro sessions...
+  ]
+}
+```
+
+## Error Responses
+
+### 400 Bad Request
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Validation failed",
+    "details": {
+      "name": "任务名称不能为空"
+    }
+  }
+}
+```
+
+### 401 Unauthorized
+```json
+{
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "Authentication required"
+  }
+}
+```
+
+### 404 Not Found
+```json
+{
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "Task with ID 999 not found"
+  }
+}
+```
+
+### 500 Internal Server Error
+```json
+{
+  "error": {
+    "code": "SERVER_ERROR",
+    "message": "An unexpected error occurred"
+  }
+}
+```
