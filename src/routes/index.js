@@ -11,6 +11,7 @@ const authRoutes = require('./authRoutes');
 const habitRoutes = require('./habitRoutes');
 const calendarRoutes = require('./calendarRoutes');
 const assistantRoutes = require('./assistant');
+const feedbackRoutes = require('./feedbackRoutes');
 
 const router = express.Router();
 
@@ -30,6 +31,7 @@ router.use('/tasks', taskRoutes);
 router.use('/habits', habitRoutes);
 router.use('/calendar', calendarRoutes);
 router.use('/assistant', assistantRoutes);
+router.use('/feedback', feedbackRoutes);
 
 // Nested routes for pomodoro under tasks
 router.use('/tasks/:taskId/pomodoro', pomodoroRoutes);

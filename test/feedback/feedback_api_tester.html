@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>反馈API测试工具</title>
+    <style>
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-gap: 20px;
+        }
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            margin-top: 0;
+            color: #3498db;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+        .button-bar {
+            margin-top: 20px;
+        }
+        .result {
+            margin-top: 20px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+        .result h3 {
+            color: #e74c3c;
+        }
+        pre {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            overflow: auto;
+            max-height: 400px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .loader {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .loader.visible {
+            display: block;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .success {
+            color: #27ae60;
+        }
+        .error {
+            color: #e74c3c;
+        }
+        .feedback-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        .feedback-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+        .feedback-item:hover {
+            background-color: #f5f5f5;
+        }
+        .feedback-details {
+            margin-top: 20px;
+        }
+        .tab-container {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            margin-right: 5px;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+            background-color: #f8f9fa;
+        }
+        .tab.active {
+            background-color: white;
+            border-bottom: 1px solid white;
+            margin-bottom: -1px;
+            font-weight: bold;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>反馈API测试工具</h1>
+    
+    <div class="tab-container">
+        <div class="tab active" data-tab="create">生成反馈</div>
+        <div class="tab" data-tab="list">查看反馈列表</div>
+        <div class="tab" data-tab="detail">查看反馈详情</div>
+        <div class="tab" data-tab="error">错误测试</div>
+    </div>
+    
+    <div class="container">
+        <!-- 生成反馈 -->
+        <div class="tab-content active" id="create-content">
+            <div class="card">
+                <h2>生成反馈</h2>
+                <div class="form-group">
+                    <label for="userInput">用户输入:</label>
+                    <textarea id="userInput" placeholder="请输入一些内容..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="encourageStyle">鼓励风格:</label>
+                    <select id="encourageStyle">
+                        <option value="热情鼓励">热情鼓励</option>
+                        <option value="温和鼓励">温和鼓励</option>
+                        <option value="幽默鼓励">幽默鼓励</option>
+                        <option value="诗意鼓励">诗意鼓励</option>
+                        <option value="像长辈一样鼓励">像长辈一样鼓励</option>
+                        <option value="像朋友一样鼓励">像朋友一样鼓励</option>
+                        <option value="像导师一样鼓励">像导师一样鼓励</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="criticizeStyle">批评风格:</label>
+                    <select id="criticizeStyle">
+                        <option value="委婉批评">委婉批评</option>
+                        <option value="直接批评">直接批评</option>
+                        <option value="建设性批评">建设性批评</option>
+                        <option value="幽默批评">幽默批评</option>
+                        <option value="像长辈一样批评">像长辈一样批评</option>
+                        <option value="像朋友一样批评">像朋友一样批评</option>
+                        <option value="像导师一样批评">像导师一样批评</option>
+                    </select>
+                </div>
+                
+                <div class="button-bar">
+                    <button id="createBtn">生成反馈</button>
+                </div>
+                
+                <div class="loader" id="createLoader">
+                    <div class="spinner"></div>
+                    <p>请求中，请稍候...</p>
+                </div>
+                
+                <div class="result" id="createResult" style="display: none;">
+                    <h3>生成结果</h3>
+                    <div id="createResultContent"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 查看反馈列表 -->
+        <div class="tab-content" id="list-content">
+            <div class="card">
+                <h2>反馈列表</h2>
+                <div class="form-group">
+                    <label>分页:</label>
+                    <div>
+                        <input type="number" id="page" min="1" value="1" style="width: 80px;"> 页
+                        <input type="number" id="limit" min="1" max="50" value="10" style="width: 80px;"> 条/页
+                    </div>
+                </div>
+                
+                <div class="button-bar">
+                    <button id="listBtn">获取列表</button>
+                </div>
+                
+                <div class="loader" id="listLoader">
+                    <div class="spinner"></div>
+                    <p>请求中，请稍候...</p>
+                </div>
+                
+                <div class="result" id="listResult" style="display: none;">
+                    <h3>反馈列表</h3>
+                    <div id="listStats"></div>
+                    <div class="feedback-list" id="feedbackList"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 查看单条反馈 -->
+        <div class="tab-content" id="detail-content">
+            <div class="card">
+                <h2>反馈详情</h2>
+                <div class="form-group">
+                    <label for="feedbackId">反馈ID:</label>
+                    <input type="text" id="feedbackId" placeholder="输入反馈ID...">
+                </div>
+                
+                <div class="button-bar">
+                    <button id="detailBtn">获取详情</button>
+                </div>
+                
+                <div class="loader" id="detailLoader">
+                    <div class="spinner"></div>
+                    <p>请求中，请稍候...</p>
+                </div>
+                
+                <div class="result" id="detailResult" style="display: none;">
+                    <h3>反馈详情</h3>
+                    <div id="detailResultContent"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 错误测试 -->
+        <div class="tab-content" id="error-content">
+            <div class="card">
+                <h2>错误测试</h2>
+                <div class="form-group">
+                    <label>测试类型:</label>
+                    <select id="errorType">
+                        <option value="missing-fields">缺少必填字段</option>
+                        <option value="invalid-id">无效的ID</option>
+                    </select>
+                </div>
+                
+                <div class="button-bar">
+                    <button id="errorBtn">测试错误处理</button>
+                </div>
+                
+                <div class="loader" id="errorLoader">
+                    <div class="spinner"></div>
+                    <p>请求中，请稍候...</p>
+                </div>
+                
+                <div class="result" id="errorResult" style="display: none;">
+                    <h3>错误测试结果</h3>
+                    <div id="errorResultContent"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 响应详情 -->
+        <div class="card">
+            <h2>响应详情</h2>
+            <div class="form-group">
+                <label>状态码: <span id="statusCode">-</span></label>
+            </div>
+            
+            <div class="form-group">
+                <label>响应时间: <span id="responseTime">-</span> ms</label>
+            </div>
+            
+            <pre id="responseData">// 响应数据将显示在这里</pre>
+        </div>
+    </div>
+    
+    <script>
+        // 配置
+        const API_BASE_URL = '/api/v1/feedback';
+        let lastCreatedId = null;
+        
+        // DOM元素
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        // API封装
+        const api = {
+            // 生成反馈
+            async createFeedback(userInput, encourageStyle, criticizeStyle) {
+                const startTime = Date.now();
+                try {
+                    const response = await fetch(API_BASE_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            userInput,
+                            encourageStyle,
+                            criticizeStyle
+                        })
+                    });
+                    
+                    const responseTime = Date.now() - startTime;
+                    const data = await response.json();
+                    
+                    return {
+                        status: response.status,
+                        data,
+                        responseTime
+                    };
+                } catch (error) {
+                    return {
+                        status: 0,
+                        data: { success: false, error: error.message },
+                        responseTime: Date.now() - startTime
+                    };
+                }
+            },
+            
+            // 获取反馈列表
+            async getFeedbackList(page = 1, limit = 10) {
+                const startTime = Date.now();
+                try {
+                    const response = await fetch(`${API_BASE_URL}?page=${page}&limit=${limit}`);
+                    
+                    const responseTime = Date.now() - startTime;
+                    const data = await response.json();
+                    
+                    return {
+                        status: response.status,
+                        data,
+                        responseTime
+                    };
+                } catch (error) {
+                    return {
+                        status: 0,
+                        data: { success: false, error: error.message },
+                        responseTime: Date.now() - startTime
+                    };
+                }
+            },
+            
+            // 获取反馈详情
+            async getFeedbackDetail(id) {
+                const startTime = Date.now();
+                try {
+                    const response = await fetch(`${API_BASE_URL}/${id}`);
+                    
+                    const responseTime = Date.now() - startTime;
+                    const data = await response.json();
+                    
+                    return {
+                        status: response.status,
+                        data,
+                        responseTime
+                    };
+                } catch (error) {
+                    return {
+                        status: 0,
+                        data: { success: false, error: error.message },
+                        responseTime: Date.now() - startTime
+                    };
+                }
+            },
+            
+            // 测试缺少字段错误
+            async testMissingFields() {
+                const startTime = Date.now();
+                try {
+                    const response = await fetch(API_BASE_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            userInput: "测试数据"
+                            // 故意不提供其他必填字段
+                        })
+                    });
+                    
+                    const responseTime = Date.now() - startTime;
+                    const data = await response.json();
+                    
+                    return {
+                        status: response.status,
+                        data,
+                        responseTime
+                    };
+                } catch (error) {
+                    return {
+                        status: 0,
+                        data: { success: false, error: error.message },
+                        responseTime: Date.now() - startTime
+                    };
+                }
+            },
+            
+            // 测试无效ID错误
+            async testInvalidId() {
+                const startTime = Date.now();
+                try {
+                    const response = await fetch(`${API_BASE_URL}/invalid-id-12345`);
+                    
+                    const responseTime = Date.now() - startTime;
+                    const data = await response.json();
+                    
+                    return {
+                        status: response.status,
+                        data,
+                        responseTime
+                    };
+                } catch (error) {
+                    return {
+                        status: 0,
+                        data: { success: false, error: error.message },
+                        responseTime: Date.now() - startTime
+                    };
+                }
+            }
+        };
+        
+        // 辅助函数
+        function showLoader(id) {
+            document.getElementById(id).classList.add('visible');
+        }
+        
+        function hideLoader(id) {
+            document.getElementById(id).classList.remove('visible');
+        }
+        
+        function showResult(id) {
+            document.getElementById(id).style.display = 'block';
+        }
+        
+        function hideResult(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+        
+        function updateResponseDisplay(status, time, data) {
+            document.getElementById('statusCode').textContent = status;
+            document.getElementById('responseTime').textContent = time;
+            document.getElementById('responseData').textContent = JSON.stringify(data, null, 2);
+        }
+        
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleString();
+        }
+        
+        // 事件处理函数
+        async function handleCreateFeedback() {
+            const userInput = document.getElementById('userInput').value.trim();
+            const encourageStyle = document.getElementById('encourageStyle').value;
+            const criticizeStyle = document.getElementById('criticizeStyle').value;
+            
+            if (!userInput) {
+                alert('请输入文本内容');
+                return;
+            }
+            
+            showLoader('createLoader');
+            hideResult('createResult');
+            
+            const result = await api.createFeedback(userInput, encourageStyle, criticizeStyle);
+            
+            hideLoader('createLoader');
+            showResult('createResult');
+            
+            updateResponseDisplay(result.status, result.responseTime, result.data);
+            
+            if (result.data.success) {
+                lastCreatedId = result.data.data.id;
+                
+                let html = `
+                    <div class="success">✓ 反馈生成成功</div>
+                    <p><strong>鼓励语句:</strong> ${result.data.data.encourage}</p>
+                    <p><strong>批评语句:</strong> ${result.data.data.criticize}</p>
+                    <p><strong>ID:</strong> ${result.data.data.id}</p>
+                `;
+                
+                document.getElementById('createResultContent').innerHTML = html;
+            } else {
+                document.getElementById('createResultContent').innerHTML = `
+                    <div class="error">✗ 反馈生成失败</div>
+                    <p><strong>错误:</strong> ${result.data.message || '未知错误'}</p>
+                `;
+            }
+        }
+        
+        async function handleGetFeedbackList() {
+            const page = parseInt(document.getElementById('page').value) || 1;
+            const limit = parseInt(document.getElementById('limit').value) || 10;
+            
+            showLoader('listLoader');
+            hideResult('listResult');
+            
+            const result = await api.getFeedbackList(page, limit);
+            
+            hideLoader('listLoader');
+            showResult('listResult');
+            
+            updateResponseDisplay(result.status, result.responseTime, result.data);
+            
+            if (result.data.success) {
+                const { total, page, pages, limit } = result.data.pagination;
+                
+                document.getElementById('listStats').innerHTML = `
+                    <p>共 ${total} 条记录，当前第 ${page}/${pages} 页，每页 ${limit} 条</p>
+                `;
+                
+                let listHtml = '';
+                if (result.data.data.length === 0) {
+                    listHtml = '<p>没有找到记录</p>';
+                } else {
+                    result.data.data.forEach(item => {
+                        listHtml += `
+                            <div class="feedback-item" data-id="${item._id}">
+                                <p><strong>ID:</strong> ${item._id}</p>
+                                <p><strong>用户输入:</strong> ${item.userInput}</p>
+                                <p><strong>创建时间:</strong> ${formatDate(item.createdAt)}</p>
+                            </div>
+                        `;
+                    });
+                }
+                
+                document.getElementById('feedbackList').innerHTML = listHtml;
+                
+                // 添加点击事件
+                document.querySelectorAll('.feedback-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        const id = this.getAttribute('data-id');
+                        document.getElementById('feedbackId').value = id;
+                        // 切换到详情标签页
+                        document.querySelector('[data-tab="detail"]').click();
+                        // 自动请求详情
+                        document.getElementById('detailBtn').click();
+                    });
+                });
+            } else {
+                document.getElementById('listStats').innerHTML = '';
+                document.getElementById('feedbackList').innerHTML = `
+                    <div class="error">✗ 获取列表失败</div>
+                    <p><strong>错误:</strong> ${result.data.message || '未知错误'}</p>
+                `;
+            }
+        }
+        
+        async function handleGetFeedbackDetail() {
+            const id = document.getElementById('feedbackId').value.trim();
+            
+            if (!id) {
+                alert('请输入反馈ID');
+                return;
+            }
+            
+            showLoader('detailLoader');
+            hideResult('detailResult');
+            
+            const result = await api.getFeedbackDetail(id);
+            
+            hideLoader('detailLoader');
+            showResult('detailResult');
+            
+            updateResponseDisplay(result.status, result.responseTime, result.data);
+            
+            if (result.data.success) {
+                const item = result.data.data;
+                
+                document.getElementById('detailResultContent').innerHTML = `
+                    <div class="success">✓ 获取详情成功</div>
+                    <p><strong>ID:</strong> ${item._id}</p>
+                    <p><strong>用户输入:</strong> ${item.userInput}</p>
+                    <p><strong>鼓励风格:</strong> ${item.encourageStyle}</p>
+                    <p><strong>批评风格:</strong> ${item.criticizeStyle}</p>
+                    <p><strong>鼓励语句:</strong> ${item.encourageMessage}</p>
+                    <p><strong>批评语句:</strong> ${item.criticizeMessage}</p>
+                    <p><strong>创建时间:</strong> ${formatDate(item.createdAt)}</p>
+                    <p><strong>更新时间:</strong> ${formatDate(item.updatedAt)}</p>
+                `;
+            } else {
+                document.getElementById('detailResultContent').innerHTML = `
+                    <div class="error">✗ 获取详情失败</div>
+                    <p><strong>错误:</strong> ${result.data.message || '未知错误'}</p>
+                `;
+            }
+        }
+        
+        async function handleTestError() {
+            const errorType = document.getElementById('errorType').value;
+            
+            showLoader('errorLoader');
+            hideResult('errorResult');
+            
+            let result;
+            
+            if (errorType === 'missing-fields') {
+                result = await api.testMissingFields();
+            } else if (errorType === 'invalid-id') {
+                result = await api.testInvalidId();
+            }
+            
+            hideLoader('errorLoader');
+            showResult('errorResult');
+            
+            updateResponseDisplay(result.status, result.responseTime, result.data);
+            
+            // 检查错误处理是否符合预期
+            let isExpected = false;
+            let expectedMessage = '';
+            
+            if (errorType === 'missing-fields' && result.status === 400) {
+                isExpected = true;
+                expectedMessage = '✓ 成功测试缺少必填字段错误 (状态码 400)';
+            } else if (errorType === 'invalid-id' && (result.status === 404 || result.status === 500)) {
+                isExpected = true;
+                expectedMessage = `✓ 成功测试无效ID错误 (状态码 ${result.status})`;
+            }
+            
+            if (isExpected) {
+                document.getElementById('errorResultContent').innerHTML = `
+                    <div class="success">${expectedMessage}</div>
+                    <p><strong>错误消息:</strong> ${result.data.message || '未提供'}</p>
+                `;
+            } else {
+                document.getElementById('errorResultContent').innerHTML = `
+                    <div class="error">✗ 错误测试失败</div>
+                    <p><strong>预期:</strong> ${errorType === 'missing-fields' ? '400 状态码' : '404 或 500 状态码'}</p>
+                    <p><strong>实际:</strong> ${result.status} 状态码</p>
+                `;
+            }
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 标签页切换
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // 移除所有活动标签和内容
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    // 激活当前标签和内容
+                    this.classList.add('active');
+                    document.getElementById(`${this.getAttribute('data-tab')}-content`).classList.add('active');
+                });
+            });
+            
+            // 绑定按钮事件
+            document.getElementById('createBtn').addEventListener('click', handleCreateFeedback);
+            document.getElementById('listBtn').addEventListener('click', handleGetFeedbackList);
+            document.getElementById('detailBtn').addEventListener('click', handleGetFeedbackDetail);
+            document.getElementById('errorBtn').addEventListener('click', handleTestError);
+        });
+    </script>
+</body>
+</html> 
